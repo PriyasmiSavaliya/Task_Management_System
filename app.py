@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from datetime import datetime
@@ -180,6 +180,75 @@ def reports():
 @app.route('/settings')
 def settings():
     return render_template('settings.html')  # You'll need to create this template
+
+
+# Add these new routes to your app.py
+
+@app.route('/get_task/<task_id>')
+def get_task(task_id):
+    try:
+        task = mongo.db.tasks.find_one({'_id': ObjectId(task_id)})
+        if task:
+            # Convert ObjectId to string and datetime to string for JSON serialization
+            task['_id'] = str(task['_id'])
+            task['due_date'] = task['due_date'].strftime('%Y-%m-%d')
+            return jsonify(task)
+        else:
+            return jsonify({'error': 'Task not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/update_task_status/<task_id>', methods=['POST'])
+def update_task_status(task_id):
+    try:
+        data = request.get_json()
+        new_status = data.get('status')
+
+        if new_status not in ['Pending', 'In Progress', 'Completed']:
+            return jsonify({'success': False, 'error': 'Invalid status'})
+
+        mongo.db.tasks.update_one(
+            {'_id': ObjectId(task_id)},
+            {'$set': {'status': new_status}}
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/update_task/<task_id>', methods=['POST'])
+def update_task(task_id):
+    try:
+        data = request.get_json()
+
+        update_data = {
+            'title': data.get('title'),
+            'category': data.get('category'),
+            'due_date': datetime.strptime(data.get('due_date'), '%Y-%m-%d'),
+            'priority': data.get('priority')
+        }
+
+        mongo.db.tasks.update_one(
+            {'_id': ObjectId(task_id)},
+            {'$set': update_data}
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/delete_task/<task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    try:
+        result = mongo.db.tasks.delete_one({'_id': ObjectId(task_id)})
+        if result.deleted_count == 1:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Task not found'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

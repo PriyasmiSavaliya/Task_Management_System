@@ -6,8 +6,10 @@
     <title>Task Manager</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 </head>
 <body>
+    <!-- Rest of your HTML remains exactly the same -->
     <div class="app-container">
            {% include 'includes/sidebar.html' %}
 
@@ -16,7 +18,7 @@
             <!-- Top Bar -->
             <div class="top-bar">
                 <div class="top-bar-title">
-                    <h1>Board (By Status)</h1>
+                    <h1>Task Status</h1>
                 </div>
                 <div class="top-bar-actions">
                     <button class="btn btn-icon">
@@ -38,13 +40,27 @@
                     <div class="task-cards">
                         {% for task in tasks.pending %}
                         <div class="task-card">
-                            <div class="task-priority">{{ task.priority }}</div>
-                            <div class="task-content">
+                            <div class="task-header">
                                 <div class="task-title">{{ task.title }}</div>
+                                <div class="task-actions">
+                                    <button class="task-menu-btn" onclick="toggleTaskMenu('{{ task._id }}')">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="task-menu" id="menu-{{ task._id }}">
+                                        <button onclick="openEditModal('{{ task._id }}')">Edit</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'Pending')">Keep as Pending</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'In Progress')">Move to In Progress</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'Completed')">Move to Completed</button>
+                                        <button class="delete-btn" onclick="deleteTask('{{ task._id }}')">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-meta-container">
                                 <div class="task-meta">
                                     <span class="task-date">{{ task.due_date.strftime('%d/%m/%Y') }}</span>
                                     <span class="task-category">{{ task.category }}</span>
                                 </div>
+                                <div class="task-priority">{{ task.priority }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -62,13 +78,27 @@
                     <div class="task-cards">
                         {% for task in tasks.in_progress %}
                         <div class="task-card">
-                            <div class="task-priority">{{ task.priority }}</div>
-                            <div class="task-content">
+                            <div class="task-header">
                                 <div class="task-title">{{ task.title }}</div>
+                                <div class="task-actions">
+                                    <button class="task-menu-btn" onclick="toggleTaskMenu('{{ task._id }}')">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="task-menu" id="menu-{{ task._id }}">
+                                        <button onclick="openEditModal('{{ task._id }}')">Edit</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'Pending')">Move to Pending</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'In Progress')">Keep as In Progress</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'Completed')">Move to Completed</button>
+                                        <button class="delete-btn" onclick="deleteTask('{{ task._id }}')">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-meta-container">
                                 <div class="task-meta">
                                     <span class="task-date">{{ task.due_date.strftime('%d/%m/%Y') }}</span>
                                     <span class="task-category">{{ task.category }}</span>
                                 </div>
+                                <div class="task-priority">{{ task.priority }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -86,13 +116,27 @@
                     <div class="task-cards">
                         {% for task in tasks.completed %}
                         <div class="task-card">
-                            <div class="task-priority">{{ task.priority }}</div>
-                            <div class="task-content">
+                            <div class="task-header">
                                 <div class="task-title">{{ task.title }}</div>
+                                <div class="task-actions">
+                                    <button class="task-menu-btn" onclick="toggleTaskMenu('{{ task._id }}')">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="task-menu" id="menu-{{ task._id }}">
+                                        <button onclick="openEditModal('{{ task._id }}')">Edit</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'Pending')">Move to Pending</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'In Progress')">Move to In Progress</button>
+                                        <button onclick="updateTaskStatus('{{ task._id }}', 'Completed')">Keep as Completed</button>
+                                        <button class="delete-btn" onclick="deleteTask('{{ task._id }}')">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-meta-container">
                                 <div class="task-meta">
                                     <span class="task-date">{{ task.due_date.strftime('%d/%m/%Y') }}</span>
                                     <span class="task-category">{{ task.category }}</span>
                                 </div>
+                                <div class="task-priority">{{ task.priority }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -105,29 +149,38 @@
         </main>
     </div>
 
-    <!-- Task Modal -->
+    <!-- Add Task Modal -->
     <div class="modal" id="task-modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
             <h3>Add New Task</h3>
             <form method="POST" action="{{ url_for('add_task') }}" id="task-form">
                 <input type="hidden" name="status" id="modal-status">
-                
+
                 <div class="form-group">
                     <label>Title</label>
                     <input type="text" name="title" placeholder="Task title" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Category</label>
                     <input type="text" name="category" placeholder="e.g., Finance, Sales">
                 </div>
-                
+
                 <div class="form-group">
                     <label>Due Date</label>
                     <input type="date" name="due_date" required>
                 </div>
-                
+
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Save Task</button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
@@ -136,6 +189,175 @@
         </div>
     </div>
 
+    <!-- Edit Task Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h3>Edit Task</h3>
+            <form id="edit-form">
+                <input type="hidden" name="task_id" id="edit-task-id">
+
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" id="edit-title" placeholder="Task title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" name="category" id="edit-category" placeholder="e.g., Finance, Sales">
+                </div>
+
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" name="due_date" id="edit-due-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority" id="edit-priority">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="saveTaskChanges()">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="/static/js/script.js"></script>
+    <script>
+        // Function to toggle task menu
+        function toggleTaskMenu(taskId) {
+            const menu = document.getElementById(`menu-${taskId}`);
+            const allMenus = document.querySelectorAll('.task-menu');
+
+            // Close all other menus
+            allMenus.forEach(m => {
+                if (m.id !== `menu-${taskId}`) {
+                    m.style.display = 'none';
+                }
+            });
+
+            // Toggle current menu
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'block';
+            }
+        }
+
+        // Close menus when clicking elsewhere
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.task-menu') && !event.target.closest('.task-menu-btn')) {
+                document.querySelectorAll('.task-menu').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+        });
+
+        // Function to update task status
+        function updateTaskStatus(taskId, newStatus) {
+            fetch(`/update_task_status/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Refresh the page to see changes
+                } else {
+                    alert('Error updating task status');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating task status');
+            });
+        }
+
+        // Function to delete task
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                fetch(`/delete_task/${taskId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Refresh the page to see changes
+                    } else {
+                        alert('Error deleting task');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting task');
+                });
+            }
+        }
+
+        // Function to open edit modal
+        function openEditModal(taskId) {
+            fetch(`/get_task/${taskId}`)
+                .then(response => response.json())
+                .then(task => {
+                    document.getElementById('edit-task-id').value = task._id;
+                    document.getElementById('edit-title').value = task.title;
+                    document.getElementById('edit-category').value = task.category;
+                    document.getElementById('edit-due-date').value = new Date(task.due_date).toISOString().split('T')[0];
+                    document.getElementById('edit-priority').value = task.priority;
+
+                    document.getElementById('edit-modal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading task data');
+                });
+        }
+
+        // Function to close edit modal
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        // Function to save task changes
+        function saveTaskChanges() {
+            const taskId = document.getElementById('edit-task-id').value;
+            const formData = {
+                title: document.getElementById('edit-title').value,
+                category: document.getElementById('edit-category').value,
+                due_date: document.getElementById('edit-due-date').value,
+                priority: document.getElementById('edit-priority').value
+            };
+
+            fetch(`/update_task/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Refresh the page to see changes
+                } else {
+                    alert('Error updating task');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating task');
+            });
+        }
+    </script>
 </body>
 </html>

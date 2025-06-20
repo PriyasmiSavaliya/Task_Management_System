@@ -93,3 +93,27 @@ document.addEventListener('DOMContentLoaded', function() {
 function closeModal() {
     document.getElementById('event-modal').style.display = 'none';
 }
+// Function to toggle task menu
+function toggleTaskMenu(taskId) {
+    const menu = document.getElementById(`menu-${taskId}`);
+    const allMenus = document.querySelectorAll('.task-menu');
+
+    // Close all other menus
+    allMenus.forEach(m => {
+        if (m.id !== `menu-${taskId}`) {
+            m.classList.remove('show');
+        }
+    });
+
+    // Toggle current menu
+    menu.classList.toggle('show');
+}
+
+// Close menus when clicking elsewhere
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.task-menu') && !event.target.closest('.task-menu-btn')) {
+        document.querySelectorAll('.task-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});

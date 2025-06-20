@@ -307,8 +307,8 @@ body {
     font-size: 0.7rem;
     font-weight: bold;
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 15px;
+    right: 31px;
 }
 
 /* Column Title Colors */
@@ -749,3 +749,174 @@ body {
     margin-right: 8px;
 }
 
+/* Task menu styles */
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.task-actions {
+    position: relative;
+}
+
+.task-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 4px;
+}
+
+.task-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 100;
+    min-width: 160px;
+}
+
+.task-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.task-menu button:hover {
+    background-color: #f5f5f5;
+}
+
+.task-menu .delete-btn {
+    color: #e74c3c;
+}
+
+.task-menu .delete-btn:hover {
+    background-color: #fdecea;
+}
+
+/* Task Card Styles */
+.task-card {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    position: relative; /* Added for proper dot positioning */
+}
+
+.task-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-right: 30px; /* Make space for dots */
+}
+
+/* Three-dot menu button styles (KEEPING THE DOTS) */
+.task-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.task-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 4px 8px;
+    font-size: 1rem;
+}
+
+.task-menu-btn:hover {
+    color: #333;
+}
+
+/* Menu dropdown styles */
+.task-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 100;
+    min-width: 160px;
+}
+
+.task-menu.show {
+    display: block;
+}
+
+/* Rest of the task card styles remain the same */
+.task-meta-container {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 8px;
+}
+
+.task-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.task-date {
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.task-category-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-category {
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+    background-color: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.task-priority {
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Priority colors */
+.task-priority[data-priority="High"] {
+    background-color: #ffebee;
+    color: #c62828;
+}
+.task-priority[data-priority="Medium"] {
+    background-color: #fff8e1;
+    color: #f57f17;
+}
+.task-priority[data-priority="Low"] {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
