@@ -1,0 +1,159 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Task Manager | Dashboard</title>
+        <link rel="stylesheet" href="/static/css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </head>
+    <body>
+        <div class="app-container">
+                    {% include 'includes/sidebar.html' %}
+
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Top Bar -->
+              <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-title">
+            <h1>Dashboard Overview</h1>
+            <p>Welcome back! Here's what's happening with your tasks.</p>
+        </div>
+        <div class="user-profile">
+            {% if 'user_id' in session %}
+            <div class="user-dropdown">
+    {#            <img src="https://via.placeholder.com/40" alt="User" class="user-avatar">#}
+                <span class="user-name">{{ username }}</span>
+                <i class="fas fa-caret-down"></i>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item"><i class="fas fa-user-edit"></i> Edit Profile</a>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">Login</a>
+            {% endif %}
+        </div>
+    </div>
+                <!-- Dashboard Widgets -->
+                <div class="dashboard-widgets">
+                    <!-- Task Summary -->
+                    <!-- Task Summary -->
+<div class="widget task-summary">
+    <div class="widget-header">
+        <h3>Task Summary</h3>
+        <div class="widget-actions">
+            <button class="btn-icon"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+    </div>
+    <div class="widget-content">
+        <div class="summary-item pending">
+            <div class="summary-count">{{ pending }}</div>
+            <div class="summary-label">Pending</div>
+        </div>
+        <div class="summary-item in-progress">
+            <div class="summary-count">{{ in_progress }}</div>
+            <div class="summary-label">In Progress</div>
+        </div>
+        <div class="summary-item completed">
+            <div class="summary-count">{{ completed }}</div>
+            <div class="summary-label">Completed</div>
+        </div>
+    </div>
+</div>
+
+                    <!-- Recent Activities -->
+                    <div class="widget recent-activities">
+                        <div class="widget-header">
+                            <h3>Recent Activities</h3>
+                            <div class="widget-actions">
+                                <button class="btn-icon"><i class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <ul class="activity-list">
+                                <li>
+                                    <i class="fas fa-check-circle completed"></i>
+                                    <div class="activity-details">
+                                        <span class="activity-text">Completed "Prepare project report"</span>
+                                        <span class="activity-time">2 hours ago</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <i class="fas fa-arrow-right in-progress"></i>
+                                    <div class="activity-details">
+                                        <span class="activity-text">Moved "Client meeting" to In Progress</span>
+                                        <span class="activity-time">5 hours ago</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <i class="fas fa-plus pending"></i>
+                                    <div class="activity-details">
+                                        <span class="activity-text">Added "Review design mockups"</span>
+                                        <span class="activity-time">Yesterday</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Deadlines -->
+                    <div class="widget upcoming-deadlines">
+                        <div class="widget-header">
+                            <h3>Upcoming Deadlines</h3>
+                            <div class="widget-actions">
+                                <button class="btn-icon"><i class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="deadline-item">
+                                <div class="deadline-date">
+                                    <span class="date-day">15</span>
+                                    <span class="date-month">Jun</span>
+                                </div>
+                                <div class="deadline-details">
+                                    <span class="deadline-title">Project submission</span>
+                                    <span class="deadline-project">Client Project</span>
+                                </div>
+                                <div class="deadline-actions">
+                                    <button class="btn-icon small"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            <div class="deadline-item">
+                                <div class="deadline-date">
+                                    <span class="date-day">18</span>
+                                    <span class="date-month">Jun</span>
+                                </div>
+                                <div class="deadline-details">
+                                    <span class="deadline-title">Team meeting</span>
+                                    <span class="deadline-project">Internal</span>
+                                </div>
+                                <div class="deadline-actions">
+                                    <button class="btn-icon small"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Chart -->
+                    <div class="widget performance-chart">
+                        <div class="widget-header">
+                            <h3>Task Completion Rate</h3>
+                            <div class="widget-actions">
+                                <button class="btn-icon"><i class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-line"></i>
+                                <p>Task completion chart will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </body>
+    </html>

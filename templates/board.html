@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+           {% include 'includes/sidebar.html' %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-bar-title">
+                    <h1>Board (By Status)</h1>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="btn btn-icon">
+                        <i class="fas fa-upload"></i> Upload Project Logo
+                    </button>
+                    <button class="btn btn-icon">
+                        <i class="fas fa-file-import"></i> Import Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kanban Board -->
+            <div class="kanban-board">
+                <!-- Pending Column -->
+                <div class="status-column">
+                    <div class="column-header">
+                        <h3>Pending</h3>
+                    </div>
+                    <div class="task-cards">
+                        {% for task in tasks.pending %}
+                        <div class="task-card">
+                            <div class="task-priority">{{ task.priority }}</div>
+                            <div class="task-content">
+                                <div class="task-title">{{ task.title }}</div>
+                                <div class="task-meta">
+                                    <span class="task-date">{{ task.due_date.strftime('%d/%m/%Y') }}</span>
+                                    <span class="task-category">{{ task.category }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <button class="add-card-btn" onclick="openModal('Pending')">
+                            <i class="fas fa-plus"></i> Add New Card
+                        </button>
+                    </div>
+                </div>
+
+                <!-- In Progress Column -->
+                <div class="status-column">
+                    <div class="column-header">
+                        <h3>In Progress</h3>
+                    </div>
+                    <div class="task-cards">
+                        {% for task in tasks.in_progress %}
+                        <div class="task-card">
+                            <div class="task-priority">{{ task.priority }}</div>
+                            <div class="task-content">
+                                <div class="task-title">{{ task.title }}</div>
+                                <div class="task-meta">
+                                    <span class="task-date">{{ task.due_date.strftime('%d/%m/%Y') }}</span>
+                                    <span class="task-category">{{ task.category }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <button class="add-card-btn" onclick="openModal('In Progress')">
+                            <i class="fas fa-plus"></i> Add New Card
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Completed Column -->
+                <div class="status-column">
+                    <div class="column-header">
+                        <h3>Completed</h3>
+                    </div>
+                    <div class="task-cards">
+                        {% for task in tasks.completed %}
+                        <div class="task-card">
+                            <div class="task-priority">{{ task.priority }}</div>
+                            <div class="task-content">
+                                <div class="task-title">{{ task.title }}</div>
+                                <div class="task-meta">
+                                    <span class="task-date">{{ task.due_date.strftime('%d/%m/%Y') }}</span>
+                                    <span class="task-category">{{ task.category }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <button class="add-card-btn" onclick="openModal('Completed')">
+                            <i class="fas fa-plus"></i> Add New Card
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3>Add New Task</h3>
+            <form method="POST" action="{{ url_for('add_task') }}" id="task-form">
+                <input type="hidden" name="status" id="modal-status">
+                
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" placeholder="Task title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" name="category" placeholder="e.g., Finance, Sales">
+                </div>
+                
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" name="due_date" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Task</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

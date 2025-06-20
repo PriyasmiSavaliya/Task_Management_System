@@ -1,0 +1,28 @@
+<!-- Sidebar Partial -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h2>Task Manager</h2>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.path == url_for('dashboard') %}active{% endif %}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('board') }}" class="nav-item {% if request.path == url_for('board') %}active{% endif %}">
+            <i class="fas fa-tasks"></i>
+            <span>Tasks</span>
+        </a>
+        <a href="{{ url_for('calendar') }}" class="nav-item {% if request.path == url_for('calendar') %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Calendar</span>
+        </a>
+        <a href="{{ url_for('reports') }}" class="nav-item {% if request.path == url_for('reports') %}active{% endif %}">
+            <i class="fas fa-chart-bar"></i>
+            <span>Reports</span>
+        </a>
+        <a href="{{ url_for('settings') }}" class="nav-item {% if request.path == url_for('settings') %}active{% endif %}">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+        </a>
+    </nav>
+</aside>
