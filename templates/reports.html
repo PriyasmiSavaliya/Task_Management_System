@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager | Reports</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-title">
+                    <h1>Task Reports</h1>
+                    <p>Analyze and export your task data</p>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="btn btn-icon" id="export-btn">
+                        <i class="fas fa-file-export"></i> Export Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Report Filters -->
+            <div class="report-filters">
+                <div class="filter-group">
+                    <label for="status-filter">Status:</label>
+                    <select id="status-filter">
+                        <option value="all">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="priority-filter">Priority:</label>
+                    <select id="priority-filter">
+                        <option value="all">All Priorities</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="date-from">From:</label>
+                    <input type="date" id="date-from">
+                </div>
+
+                <div class="filter-group">
+                    <label for="date-to">To:</label>
+                    <input type="date" id="date-to">
+                </div>
+
+                <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+                <button class="btn btn-secondary" id="reset-filters">Reset</button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-tasks">0</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pending-tasks">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="inprogress-tasks">0</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="completed-tasks">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+
+            <!-- Tasks Table -->
+            <div class="report-table-container">
+                <table class="report-table" id="tasks-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Category</th>
+                            <th>Due Date</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr data-status="{{ task.status }}" data-priority="{{ task.priority }}"
+                            data-date="{{ task.due_date.strftime('%Y-%m-%d') }}">
+                            <td>{{ task.title }}</td>
+                            <td>
+                                <span class="status-badge status-{{ task.status.lower().replace(' ', '-') }}">
+                                    {{ task.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="priority-badge priority-{{ task.priority.lower() }}">
+                                    {{ task.priority }}
+                                </span>
+                            </td>
+                            <td>{{ task.category }}</td>
+                            <td>{{ task.due_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <button class="btn-icon" onclick="viewTaskDetails('{{ task._id }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Task Details Modal -->
+            <div class="modal" id="task-details-modal">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="closeTaskDetails()">&times;</span>
+                    <h3 id="task-details-title">Task Details</h3>
+                    <div class="task-details-content">
+                        <div class="detail-row">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value" id="detail-status"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Priority:</span>
+                            <span class="detail-value" id="detail-priority"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Category:</span>
+                            <span class="detail-value" id="detail-category"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Due Date:</span>
+                            <span class="detail-value" id="detail-due-date"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Created At:</span>
+                            <span class="detail-value" id="detail-created-at"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize statistics
+            updateStatistics();
+
+            // Filter functionality
+            document.getElementById('apply-filters').addEventListener('click', applyFilters);
+            document.getElementById('reset-filters').addEventListener('click', resetFilters);
+
+            // Export functionality
+            document.getElementById('export-btn').addEventListener('click', exportReport);
+        });
+
+        function updateStatistics() {
+            const totalTasks = document.querySelectorAll('#tasks-table tbody tr').length;
+            const pendingTasks = document.querySelectorAll('#tasks-table tbody tr[data-status="Pending"]').length;
+            const inProgressTasks = document.querySelectorAll('#tasks-table tbody tr[data-status="In Progress"]').length;
+            const completedTasks = document.querySelectorAll('#tasks-table tbody tr[data-status="Completed"]').length;
+
+            document.getElementById('total-tasks').textContent = totalTasks;
+            document.getElementById('pending-tasks').textContent = pendingTasks;
+            document.getElementById('inprogress-tasks').textContent = inProgressTasks;
+            document.getElementById('completed-tasks').textContent = completedTasks;
+        }
+
+        function applyFilters() {
+            const statusFilter = document.getElementById('status-filter').value;
+            const priorityFilter = document.getElementById('priority-filter').value;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+
+            const rows = document.querySelectorAll('#tasks-table tbody tr');
+
+            rows.forEach(row => {
+                let showRow = true;
+
+                // Apply status filter
+                if (statusFilter !== 'all' && row.dataset.status !== statusFilter) {
+                    showRow = false;
+                }
+
+                // Apply priority filter
+                if (priorityFilter !== 'all' && row.dataset.priority !== priorityFilter) {
+                    showRow = false;
+                }
+
+                // Apply date range filter
+                if (dateFrom && row.dataset.date < dateFrom) {
+                    showRow = false;
+                }
+
+                if (dateTo && row.dataset.date > dateTo) {
+                    showRow = false;
+                }
+
+                row.style.display = showRow ? '' : 'none';
+            });
+
+            updateStatistics();
+        }
+
+        function resetFilters() {
+            document.getElementById('status-filter').value = 'all';
+            document.getElementById('priority-filter').value = 'all';
+            document.getElementById('date-from').value = '';
+            document.getElementById('date-to').value = '';
+
+            const rows = document.querySelectorAll('#tasks-table tbody tr');
+            rows.forEach(row => row.style.display = '');
+
+            updateStatistics();
+        }
+
+        function exportReport() {
+            // Get filtered data
+            const filteredRows = Array.from(document.querySelectorAll('#tasks-table tbody tr'))
+                .filter(row => row.style.display !== 'none')
+                .map(row => {
+                    return {
+                        title: row.cells[0].textContent,
+                        status: row.cells[1].textContent.trim(),
+                        priority: row.cells[2].textContent.trim(),
+                        category: row.cells[3].textContent,
+                        dueDate: row.cells[4].textContent,
+                        createdAt: row.cells[5].textContent
+                    };
+                });
+
+            // Convert to CSV
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            // Add headers
+            csvContent += "Title,Status,Priority,Category,Due Date,Created At\n";
+
+            // Add rows
+            filteredRows.forEach(row => {
+                csvContent += `"${row.title}","${row.status}","${row.priority}","${row.category}","${row.dueDate}","${row.createdAt}"\n`;
+            });
+
+            // Create download link
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "task_report.csv");
+            document.body.appendChild(link);
+
+            // Trigger download
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function viewTaskDetails(taskId) {
+            fetch(`/get_task/${taskId}`)
+                .then(response => response.json())
+                .then(task => {
+                    document.getElementById('task-details-title').textContent = task.title;
+                    document.getElementById('detail-status').textContent = task.status;
+                    document.getElementById('detail-priority').textContent = task.priority;
+                    document.getElementById('detail-category').textContent = task.category || 'None';
+                    document.getElementById('detail-due-date').textContent = task.due_date;
+                    document.getElementById('detail-created-at').textContent = new Date(task.created_at).toLocaleString();
+
+                    document.getElementById('task-details-modal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading task details');
+                });
+        }
+
+        function closeTaskDetails() {
+            document.getElementById('task-details-modal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('task-details-modal')) {
+                closeTaskDetails();
+            }
+        });
+    </script>
+</body>
+</html>

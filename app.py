@@ -173,9 +173,20 @@ def calendar():
         flash(f'Error loading calendar: {str(e)}', 'error')
         return render_template('calendar.html', events=[])
 
+
 @app.route('/reports')
 def reports():
-    return render_template('reports.html')  # You'll need to create this template
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        # Get all tasks for the logged-in user, sorted by due date
+        tasks = list(mongo.db.tasks.find({'user_id': session['user_id']}).sort('due_date', 1))
+        return render_template('reports.html', tasks=tasks)
+    except Exception as e:
+        flash(f'Error loading reports: {str(e)}', 'error')
+        return render_template('reports.html', tasks=[])
+
 
 @app.route('/settings')
 def settings():
