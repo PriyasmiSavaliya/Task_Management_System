@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from datetime import datetime
 from datetime import datetime
+from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -16,6 +17,19 @@ mongo = PyMongo(app)
 @app.route('/')
 def home():
     return redirect(url_for('dashboard'))
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+class User(UserMixin):
+    def __init__(self, user_data):
+        self.id = str(user_data['_id'])
+        self.username = user_data['username']
+        self.email = user_data['email']
+
+@login_manager.user_loader
+def load_user(user_id):
+    user_data = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+    return User(user_data) if user_data else None
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -27,7 +41,7 @@ def login():
         user = mongo.db.users.find_one({'email': email})
 
         if user and check_password_hash(user['password'], password):
-            session['user_id'] = str(user['_id'])
+            login_user(User(user))
             session['username'] = user['username']  # Make sure this is set
             flash('Logged in successfully!', 'success')
             return redirect(url_for('dashboard'))
@@ -190,8 +204,19 @@ def reports():
 
 @app.route('/settings')
 def settings():
-    return render_template('settings.html')  # You'll need to create this template
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
 
+    try:
+        user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
+        if not user:
+            flash('User not found', 'error')
+            return redirect(url_for('login'))
+
+        return render_template('settings.html', current_user=user)
+    except Exception as e:
+        flash(f'Error loading settings: {str(e)}', 'error')
+        return redirect(url_for('dashboard'))
 
 # Add these new routes to your app.py
 
@@ -259,6 +284,174 @@ def delete_task(task_id):
             return jsonify({'success': False, 'error': 'Task not found'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+
+# Settings-related routes
+@app.route('/get_user_settings')
+def get_user_settings():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authorized'}), 401
+
+    try:
+        user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
+        if user:
+            return jsonify({
+                'email_notifications': user.get('email_notifications', True),
+                'browser_notifications': user.get('browser_notifications', True),
+                'reminder_time': user.get('reminder_time', '30'),
+                'theme': user.get('theme', 'light'),
+                'default_view': user.get('default_view', 'board'),
+                'auto_archive': user.get('auto_archive', False)
+            })
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authorized'}), 401
+
+    try:
+        data = request.get_json()
+        mongo.db.users.update_one(
+            {'_id': ObjectId(session['user_id'])},
+            {'$set': {
+                'username': data['username'],
+                'email': data['email']
+            }}
+        )
+        session['username'] = data['username']
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authorized'}), 401
+
+    try:
+        data = request.get_json()
+        user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
+
+        if not user or not check_password_hash(user['password'], data['current_password']):
+            return jsonify({'success': False, 'error': 'Current password is incorrect'}), 401
+
+        if data['new_password'] != data['confirm_password']:
+            return jsonify({'success': False, 'error': 'Passwords do not match'}), 400
+
+        hashed_password = generate_password_hash(data['new_password'])
+        mongo.db.users.update_one(
+            {'_id': ObjectId(session['user_id'])},
+            {'$set': {'password': hashed_password}}
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/update_notification_settings', methods=['POST'])
+def update_notification_settings():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authorized'}), 401
+
+    try:
+        data = request.get_json()
+        mongo.db.users.update_one(
+            {'_id': ObjectId(session['user_id'])},
+            {'$set': {
+                'email_notifications': data['email_notifications'],
+                'browser_notifications': data['browser_notifications'],
+                'reminder_time': data['reminder_time']
+            }}
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/update_app_preferences', methods=['POST'])
+def update_app_preferences():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authorized'}), 401
+
+    try:
+        data = request.get_json()
+        mongo.db.users.update_one(
+            {'_id': ObjectId(session['user_id'])},
+            {'$set': {
+                'theme': data['theme'],
+                'default_view': data['default_view'],
+                'auto_archive': data['auto_archive']
+            }}
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/export_data')
+def export_data():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authorized'}), 401
+
+    try:
+        # Get all user data
+        user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
+        tasks = list(mongo.db.tasks.find({'user_id': session['user_id']}))
+
+        # Prepare export data
+        export_data = {
+            'user': {
+                'username': user['username'],
+                'email': user['email'],
+                'settings': {
+                    'email_notifications': user.get('email_notifications', True),
+                    'browser_notifications': user.get('browser_notifications', True),
+                    'reminder_time': user.get('reminder_time', '30'),
+                    'theme': user.get('theme', 'light'),
+                    'default_view': user.get('default_view', 'board'),
+                    'auto_archive': user.get('auto_archive', False)
+                }
+            },
+            'tasks': tasks
+        }
+
+        # Create response
+        from io import BytesIO
+        import json
+        mem_file = BytesIO()
+        mem_file.write(json.dumps(export_data, default=str).encode('utf-8'))
+        mem_file.seek(0)
+
+        return send_file(
+            mem_file,
+            as_attachment=True,
+            download_name='taskmanager_export.json',
+            mimetype='application/json'
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/delete_account', methods=['DELETE'])
+def delete_account():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authorized'}), 401
+
+    try:
+        # Delete all user data
+        mongo.db.users.delete_one({'_id': ObjectId(session['user_id'])})
+        mongo.db.tasks.delete_many({'user_id': session['user_id']})
+
+        # Clear session
+        session.clear()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 if __name__ == '__main__':

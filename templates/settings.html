@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager | Settings</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-title">
+                    <h1>Settings</h1>
+                    <p>Manage your account and application preferences</p>
+                </div>
+            </div>
+
+            <div class="settings-wrapper">
+                <!-- Settings Sidebar -->
+                <div class="settings-sidebar">
+                    <ul class="settings-menu">
+                        <li class="menu-item active" data-target="account-settings">
+                            <i class="fas fa-user-cog"></i> Account Settings
+                        </li>
+                        <li class="menu-item" data-target="password-settings">
+                            <i class="fas fa-lock"></i> Change Password
+                        </li>
+                        <li class="menu-item" data-target="notification-settings">
+                            <i class="fas fa-bell"></i> Notifications
+                        </li>
+                        <li class="menu-item" data-target="preference-settings">
+                            <i class="fas fa-sliders-h"></i> Preferences
+                        </li>
+                        <li class="menu-item danger" data-target="danger-settings">
+                            <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Settings Content -->
+                <div class="settings-content">
+                    <!-- Account Settings Section -->
+                    <div id="account-settings" class="settings-section active">
+                        <div class="settings-card">
+                            <h2><i class="fas fa-user-cog"></i> Account Settings</h2>
+                            <form id="profile-form">
+                                <div class="form-group">
+                                    <label for="username">Username</label>
+                                    <input type="text" id="username" name="username" value="{{ current_user.username }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" value="{{ current_user.email }}">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update Profile</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Password Change Section -->
+                    <div id="password-settings" class="settings-section">
+                        <div class="settings-card">
+                            <h2><i class="fas fa-lock"></i> Change Password</h2>
+                            <form id="password-form">
+                                <div class="form-group">
+                                    <label for="current-password">Current Password</label>
+                                    <input type="password" id="current-password" name="current_password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-password">New Password</label>
+                                    <input type="password" id="new-password" name="new_password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirm-password">Confirm New Password</label>
+                                    <input type="password" id="confirm-password" name="confirm_password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Change Password</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div id="notification-settings" class="settings-section">
+                        <div class="settings-card">
+                            <h2><i class="fas fa-bell"></i> Notification Preferences</h2>
+                            <form id="notification-form">
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="email-notifications" name="email_notifications" checked>
+                                    <label for="email-notifications">Email Notifications</label>
+                                </div>
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="browser-notifications" name="browser_notifications" checked>
+                                    <label for="browser-notifications">Browser Notifications</label>
+                                </div>
+                                <div class="form-group">
+                                    <label>Reminder Time</label>
+                                    <select id="reminder-time" name="reminder_time">
+                                        <option value="15">15 minutes before</option>
+                                        <option value="30">30 minutes before</option>
+                                        <option value="60">1 hour before</option>
+                                        <option value="1440">1 day before</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Preferences</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Application Preferences -->
+                    <div id="preference-settings" class="settings-section">
+                        <div class="settings-card">
+                            <h2><i class="fas fa-sliders-h"></i> Application Preferences</h2>
+                            <form id="preferences-form">
+                                <div class="form-group">
+                                    <label for="theme">Theme</label>
+                                    <select id="theme" name="theme">
+                                        <option value="light">Light</option>
+                                        <option value="dark">Dark</option>
+                                        <option value="system">System Default</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="default-view">Default View</label>
+                                    <select id="default-view" name="default_view">
+                                        <option value="board">Task Board</option>
+                                        <option value="calendar">Calendar</option>
+                                        <option value="list">List View</option>
+                                    </select>
+                                </div>
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="auto-archive" name="auto_archive">
+                                    <label for="auto-archive">Auto-archive completed tasks after 7 days</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Preferences</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div id="danger-settings" class="settings-section">
+                        <div class="settings-card">
+                            <h2><i class="fas fa-exclamation-triangle"></i> Danger Zone</h2>
+                            <div class="danger-actions">
+                                <button class="btn btn-danger" id="export-data">
+                                    <i class="fas fa-file-export"></i> Export All Data
+                                </button>
+                                <button class="btn btn-danger" id="delete-account">
+                                    <i class="fas fa-trash-alt"></i> Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content">
+            <h3 id="confirm-title">Confirm Action</h3>
+            <p id="confirm-message">Are you sure you want to perform this action?</p>
+            <div class="modal-actions">
+                <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-ok" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Settings menu navigation
+            const menuItems = document.querySelectorAll('.settings-menu .menu-item');
+            const settingsSections = document.querySelectorAll('.settings-section');
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items and sections
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    settingsSections.forEach(section => section.classList.remove('active'));
+
+                    // Add active class to clicked item
+                    this.classList.add('active');
+
+                    // Show corresponding section
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+
+            // Form submissions
+            document.getElementById('profile-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateProfile();
+            });
+
+            document.getElementById('password-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                changePassword();
+            });
+
+            document.getElementById('notification-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveNotificationPreferences();
+            });
+
+            document.getElementById('preferences-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveAppPreferences();
+            });
+
+            // Danger zone actions
+            document.getElementById('export-data').addEventListener('click', function() {
+                showConfirmation(
+                    'Export All Data',
+                    'This will export all your tasks and settings to a JSON file. Continue?',
+                    exportAllData
+                );
+            });
+
+            document.getElementById('delete-account').addEventListener('click', function() {
+                showConfirmation(
+                    'Delete Account',
+                    'This will permanently delete your account and all your data. This action cannot be undone. Continue?',
+                    deleteAccount
+                );
+            });
+
+            // Load current settings
+            loadUserSettings();
+        });
+
+        function showConfirmation(title, message, callback) {
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+
+            modal.style.display = 'block';
+
+            document.getElementById('confirm-cancel').onclick = function() {
+                modal.style.display = 'none';
+            };
+
+            document.getElementById('confirm-ok').onclick = function() {
+                modal.style.display = 'none';
+                callback();
+            };
+
+            // Close when clicking outside
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        }
+
+        function loadUserSettings() {
+            fetch('/get_user_settings')
+                .then(response => response.json())
+                .then(settings => {
+                    // Apply settings to forms
+                    if (settings.email_notifications !== undefined) {
+                        document.getElementById('email-notifications').checked = settings.email_notifications;
+                    }
+                    if (settings.browser_notifications !== undefined) {
+                        document.getElementById('browser-notifications').checked = settings.browser_notifications;
+                    }
+                    if (settings.reminder_time) {
+                        document.getElementById('reminder-time').value = settings.reminder_time;
+                    }
+                    if (settings.theme) {
+                        document.getElementById('theme').value = settings.theme;
+                    }
+                    if (settings.default_view) {
+                        document.getElementById('default-view').value = settings.default_view;
+                    }
+                    if (settings.auto_archive !== undefined) {
+                        document.getElementById('auto-archive').checked = settings.auto_archive;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading settings:', error);
+                });
+        }
+
+        function updateProfile() {
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value
+            };
+
+            fetch('/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Profile updated successfully!', 'success');
+                } else {
+                    showAlert(data.error || 'Failed to update profile', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error updating profile', 'error');
+            });
+        }
+
+        function changePassword() {
+            const formData = {
+                current_password: document.getElementById('current-password').value,
+                new_password: document.getElementById('new-password').value,
+                confirm_password: document.getElementById('confirm-password').value
+            };
+
+            fetch('/change_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Password changed successfully!', 'success');
+                    document.getElementById('password-form').reset();
+                } else {
+                    showAlert(data.error || 'Failed to change password', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error changing password', 'error');
+            });
+        }
+
+        function saveNotificationPreferences() {
+            const formData = {
+                email_notifications: document.getElementById('email-notifications').checked,
+                browser_notifications: document.getElementById('browser-notifications').checked,
+                reminder_time: document.getElementById('reminder-time').value
+            };
+
+            fetch('/update_notification_settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Notification preferences saved!', 'success');
+                } else {
+                    showAlert(data.error || 'Failed to save preferences', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error saving preferences', 'error');
+            });
+        }
+
+        function saveAppPreferences() {
+            const formData = {
+                theme: document.getElementById('theme').value,
+                default_view: document.getElementById('default-view').value,
+                auto_archive: document.getElementById('auto-archive').checked
+            };
+
+            fetch('/update_app_preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Preferences saved!', 'success');
+                    // Apply theme immediately
+                    if (formData.theme === 'dark') {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    } else {
+                        document.documentElement.removeAttribute('data-theme');
+                    }
+                } else {
+                    showAlert(data.error || 'Failed to save preferences', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error saving preferences', 'error');
+            });
+        }
+
+        function exportAllData() {
+            fetch('/export_data')
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'taskmanager_export.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Error exporting data', 'error');
+                });
+        }
+
+        function deleteAccount() {
+            fetch('/delete_account', {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/login';
+                } else {
+                    showAlert(data.error || 'Failed to delete account', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error deleting account', 'error');
+            });
+        }
+
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            document.body.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
