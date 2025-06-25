@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
         closeModal();
         eventForm.reset();
     });
+
 });
 
 function closeModal() {

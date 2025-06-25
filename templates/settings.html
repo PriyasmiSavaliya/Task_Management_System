@@ -51,11 +51,11 @@
                             <form id="profile-form">
                                 <div class="form-group">
                                     <label for="username">Username</label>
-                                    <input type="text" id="username" name="username" value="{{ current_user.username }}">
+                                    <input type="text" id="username" name="username" value="{{ user.username }}">
                                 </div>
                                 <div class="form-group">
                                     <label for="email">Email</label>
-                                    <input type="email" id="email" name="email" value="{{ current_user.email }}">
+                                    <input type="email" id="email" name="email" value="{{ user.email }}">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Update Profile</button>
                             </form>
@@ -192,6 +192,20 @@
                     document.getElementById(target).classList.add('active');
                 });
             });
+
+            document.querySelectorAll('.settings-title').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.parentElement.classList.contains('settings-menu')) {
+                    e.preventDefault();
+                    this.parentElement.classList.toggle('active');
+                }
+            });
+        });
+
+        // Automatically expand settings menu if on settings page
+        if (window.location.pathname.includes('settings')) {
+            document.querySelector('.settings-menu').classList.add('active');
+        }
 
             // Form submissions
             document.getElementById('profile-form').addEventListener('submit', function(e) {
